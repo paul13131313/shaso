@@ -100,10 +100,10 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 180vw;
-    height: 180vh;
-    min-width: 180vw;
-    min-height: 180vh;
+    width: 300vw;
+    height: 300vh;
+    min-width: 300vw;
+    min-height: 300vh;
     border: none;
     pointer-events: none;
   }
@@ -220,6 +220,30 @@
     pointer-events: none;
   }
   #mute-toast.show { opacity: 1; }
+  /* ── fullscreen button ── */
+  #fullscreen-btn {
+    position: fixed;
+    top: 24px;
+    left: 28px;
+    z-index: 50;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+  #fullscreen-btn.show { opacity: 1; }
+  #fullscreen-btn svg {
+    width: 100%;
+    height: 100%;
+    stroke: rgba(255,255,255,0.15);
+    stroke-width: 1.5;
+    fill: none;
+    transition: stroke 0.3s ease;
+  }
+  #fullscreen-btn:hover svg {
+    stroke: rgba(255,255,255,0.4);
+  }
 </style>
 </head>
 <body>
@@ -239,6 +263,14 @@
   <div class="bar" style="height:14px"></div>
   <div class="bar" style="height:6px"></div>
   <div class="bar" style="height:11px"></div>
+</div>
+<div id="fullscreen-btn" title="fullscreen">
+  <svg viewBox="0 0 20 20">
+    <polyline points="1,7 1,1 7,1"/>
+    <polyline points="13,1 19,1 19,7"/>
+    <polyline points="19,13 19,19 13,19"/>
+    <polyline points="7,19 1,19 1,13"/>
+  </svg>
 </div>
 <div id="time-display"></div>
 <div id="route-info"></div>
@@ -286,6 +318,7 @@ function start() {
   setTimeout(() => {
     document.getElementById('sound-indicator').classList.add('show');
     document.getElementById('route-info').classList.add('show');
+    document.getElementById('fullscreen-btn').classList.add('show');
   }, 2000);
 }
 // ─── bgm with crossfade loop ───
@@ -470,6 +503,15 @@ function updateTime() {
   const m = String(now.getMinutes()).padStart(2, '0');
   document.getElementById('time-display').textContent = `${h}:${m}`;
 }
+// ─── fullscreen ───
+document.getElementById('fullscreen-btn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen();
+  }
+});
 // ─── hide cursor after idle ───
 let cursorTimer;
 document.addEventListener('mousemove', () => {
