@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>SHASO</title>
+<meta name="description" content="Just watch.">
+<meta property="og:title" content="SHASO">
+<meta property="og:description" content="Just watch.">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0a;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    cursor: none;
+    font-family: 'DM Mono', monospace;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  /* ── intro screen ── */
+  #intro {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: #0a0a0a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 1.5s ease, visibility 1.5s ease;
+  }
+  #intro.hide {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  #intro h1 {
+    font-size: clamp(2rem, 8vw, 5rem);
+    font-weight: 300;
+    color: #e8e4df;
+    letter-spacing: 0.4em;
+    margin-bottom: 0.5em;
+    opacity: 0;
+    animation: fadeUp 2s ease forwards 0.5s;
+  }
+  #intro p {
+    font-size: clamp(0.7rem, 2vw, 0.9rem);
+    color: #666;
+    letter-spacing: 0.3em;
+    opacity: 0;
+    animation: fadeUp 2s ease forwards 1.5s;
+  }
+  #intro .start-hint {
+    position: absolute;
+    bottom: 15%;
+    font-size: 0.75rem;
+    color: #444;
+    letter-spacing: 0.2em;
+    opacity: 0;
+    animation: fadeUp 2s ease forwards 2.5s;
+    cursor: pointer;
+  }
+  #intro .start-hint::after {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 30px;
+    background: #333;
+    margin: 12px auto 0;
+    animation: pulse 2s ease infinite;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.8; }
+  }
+  /* ── video ── */
+  #video-container {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    background: #0a0a0a;
+  }
+  #video-container iframe {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 180vw;
+    height: 180vh;
+    min-width: 180vw;
+    min-height: 180vh;
+    border: none;
+    pointer-events: none;
+  }
+  /* ── window frame overlay ── */
+  #window-frame {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+    box-shadow: inset 0 0 150px rgba(0,0,0,0.5);
+  }
+  /* subtle window edge */
+  #window-frame::before {
+    content: '';
+    position: absolute;
+    inset: 3%;
+    border: 1px solid rgba(255,255,255,0.03);
+    border-radius: 8px;
+  }
+  /* ── rain overlay ── */
+  #rain-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 11;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 3s ease;
+  }
+  #rain-overlay.active { opacity: 0.15; }
+  /* ── reflection overlay ── */
+  #reflection {
+    position: fixed;
+    inset: 0;
+    z-index: 12;
+    pointer-events: none;
+    background: linear-gradient(
+      165deg,
+      transparent 0%,
+      transparent 40%,
+      rgba(255,255,255,0.008) 42%,
+      transparent 44%,
+      transparent 60%,
+      rgba(255,255,255,0.005) 62%,
+      transparent 64%,
+      transparent 100%
+    );
+  }
+  /* ── clickable area ── */
+  #click-area {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    cursor: none;
+  }
+  /* ── sound indicator ── */
+  #sound-indicator {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    pointer-events: none;
+  }
+  #sound-indicator.show { opacity: 1; }
+  #sound-indicator .bar {
+    width: 2px;
+    height: 12px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 1px;
+    transition: height 0.3s ease;
+  }
+  #sound-indicator.muted .bar { height: 3px !important; }
+  /* ── time indicator ── */
+  #time-display {
+    position: fixed;
+    top: 24px;
+    right: 28px;
+    z-index: 30;
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.12);
+    letter-spacing: 0.15em;
+    pointer-events: none;
+  }
+  /* ── route info ── */
+  #route-info {
+    position: fixed;
+    bottom: 24px;
+    left: 28px;
+    z-index: 30;
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.1);
+    letter-spacing: 0.1em;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 3s ease;
+  }
+  #route-info.show { opacity: 1; }
+  /* ── mute toast ── */
+  #mute-toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 40;
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.3em;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+  }
+  #mute-toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<!-- intro -->
+<div id="intro">
+  <h1>SHASO</h1>
+  <div class="start-hint" id="start-btn">tap to start</div>
+</div>
+<!-- main -->
+<div id="video-container"></div>
+<div id="window-frame"></div>
+<div id="rain-overlay"><canvas id="rain-canvas"></canvas></div>
+<div id="reflection"></div>
+<div id="click-area"></div>
+<div id="sound-indicator">
+  <div class="bar" style="height:8px"></div>
+  <div class="bar" style="height:14px"></div>
+  <div class="bar" style="height:6px"></div>
+  <div class="bar" style="height:11px"></div>
+</div>
+<div id="time-display"></div>
+<div id="route-info"></div>
+<div id="mute-toast"></div>
+<script>
+// ─── config ───
+const ROUTES = [
+  { id: 'BQX5ycMWSCg', name: 'Enoden', start: 10 },
+  { id: 'wSMVKMDz7CQ', name: 'Hakone Tozan', start: 30 },
+  { id: '6_VsOby8K-A', name: 'Sagano Torokko', start: 20 },
+  { id: 'k05OyAU4Yis', name: 'JR Gonō Line', start: 60 },
+  { id: 'hQHkx_0GWOA', name: 'Odakyu Romancecar', start: 10 },
+];
+let audioCtx, isMuted = false, gatanInterval;
+let currentRoute;
+// ─── init ───
+document.getElementById('start-btn').addEventListener('click', start);
+document.getElementById('intro').addEventListener('click', start);
+function start() {
+  document.getElementById('intro').classList.add('hide');
+  initAudio();
+  initVideo();
+  updateTime();
+  setInterval(updateTime, 60000);
+  // show indicators after a beat
+  setTimeout(() => {
+    document.getElementById('sound-indicator').classList.add('show');
+    document.getElementById('route-info').classList.add('show');
+  }, 2000);
+}
+// ─── audio: synthesized gatangoton ───
+function initAudio() {
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  // master gain
+  const master = audioCtx.createGain();
+  master.gain.value = 0.35;
+  master.connect(audioCtx.destination);
+  // continuous rumble (brown noise)
+  const rumbleSize = audioCtx.sampleRate * 4;
+  const rumbleBuffer = audioCtx.createBuffer(2, rumbleSize, audioCtx.sampleRate);
+  for (let ch = 0; ch < 2; ch++) {
+    const data = rumbleBuffer.getChannelData(ch);
+    let last = 0;
+    for (let i = 0; i < rumbleSize; i++) {
+      const white = Math.random() * 2 - 1;
+      data[i] = (last + (0.02 * white)) / 1.02;
+      last = data[i];
+      data[i] *= 3.5;
+    }
+  }
+  const rumble = audioCtx.createBufferSource();
+  rumble.buffer = rumbleBuffer;
+  rumble.loop = true;
+  const rumbleFilter = audioCtx.createBiquadFilter();
+  rumbleFilter.type = 'lowpass';
+  rumbleFilter.frequency.value = 120;
+  const rumbleGain = audioCtx.createGain();
+  rumbleGain.gain.value = 0.6;
+  rumble.connect(rumbleFilter);
+  rumbleFilter.connect(rumbleGain);
+  rumbleGain.connect(master);
+  rumble.start();
+  // rail joint clicks (gatangoton)
+  function playClick(time, vol, pitch) {
+    const dur = 0.06;
+    const buf = audioCtx.createBuffer(1, audioCtx.sampleRate * dur, audioCtx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) {
+      const t = i / audioCtx.sampleRate;
+      d[i] = (Math.random() * 2 - 1) * Math.exp(-t * 60) * vol;
+    }
+    const src = audioCtx.createBufferSource();
+    src.buffer = buf;
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = pitch;
+    filter.Q.value = 2;
+    const gain = audioCtx.createGain();
+    gain.gain.value = vol;
+    src.connect(filter);
+    filter.connect(gain);
+    gain.connect(master);
+    src.start(time);
+  }
+  // schedule gatangoton rhythm
+  // pattern: ga-TAN go-TON (2 pairs per cycle)
+  function scheduleGatan() {
+    const now = audioCtx.currentTime;
+    const cycle = 1.6 + Math.random() * 0.15; // slight variation
+    // ga-TAN
+    playClick(now, 0.4, 300);
+    playClick(now + 0.12, 0.7, 250);
+    // go-TON
+    playClick(now + cycle * 0.5, 0.35, 320);
+    playClick(now + cycle * 0.5 + 0.12, 0.65, 230);
+    gatanInterval = setTimeout(scheduleGatan, cycle * 1000);
+  }
+  scheduleGatan();
+  // subtle wind
+  const windSize = audioCtx.sampleRate * 6;
+  const windBuffer = audioCtx.createBuffer(2, windSize, audioCtx.sampleRate);
+  for (let ch = 0; ch < 2; ch++) {
+    const data = windBuffer.getChannelData(ch);
+    for (let i = 0; i < windSize; i++) {
+      data[i] = (Math.random() * 2 - 1);
+    }
+  }
+  const wind = audioCtx.createBufferSource();
+  wind.buffer = windBuffer;
+  wind.loop = true;
+  const windFilter = audioCtx.createBiquadFilter();
+  windFilter.type = 'bandpass';
+  windFilter.frequency.value = 800;
+  windFilter.Q.value = 0.5;
+  const windGain = audioCtx.createGain();
+  windGain.gain.value = 0.04;
+  wind.connect(windFilter);
+  windFilter.connect(windGain);
+  windGain.connect(master);
+  wind.start();
+  window._audioMaster = master;
+}
+// ─── video ───
+function initVideo() {
+  currentRoute = ROUTES[Math.floor(Math.random() * ROUTES.length)];
+  const container = document.getElementById('video-container');
+  container.innerHTML = `<iframe
+    src="https://www.youtube.com/embed/${currentRoute.id}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&loop=1&playlist=${currentRoute.id}&start=${currentRoute.start}&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&playsinline=1"
+    allow="autoplay; encrypted-media"
+    allowfullscreen
+  ></iframe>`;
+  document.getElementById('route-info').textContent = currentRoute.name;
+}
+// ─── mute toggle ───
+document.getElementById('click-area').addEventListener('click', () => {
+  if (!audioCtx) return;
+  isMuted = !isMuted;
+  const indicator = document.getElementById('sound-indicator');
+  const toast = document.getElementById('mute-toast');
+  if (isMuted) {
+    window._audioMaster.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
+    indicator.classList.add('muted');
+    toast.textContent = 'OFF';
+  } else {
+    window._audioMaster.gain.linearRampToValueAtTime(0.35, audioCtx.currentTime + 0.5);
+    indicator.classList.remove('muted');
+    toast.textContent = 'ON';
+  }
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 1500);
+});
+// ─── time ───
+function updateTime() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  document.getElementById('time-display').textContent = `${h}:${m}`;
+}
+// ─── hide cursor after idle ───
+let cursorTimer;
+document.addEventListener('mousemove', () => {
+  document.body.style.cursor = 'default';
+  clearTimeout(cursorTimer);
+  cursorTimer = setTimeout(() => {
+    document.body.style.cursor = 'none';
+  }, 2000);
+});
+</script>
+</body>
+</html>
