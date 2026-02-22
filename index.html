@@ -23,7 +23,7 @@
     overflow: hidden;
     width: 100vw;
     height: 100vh;
-    cursor: none;
+    cursor: default;
     font-family: 'DM Mono', monospace;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
@@ -138,7 +138,7 @@
     position: fixed;
     inset: 0;
     z-index: 20;
-    cursor: none;
+    cursor: default;
   }
   /* ── fullscreen button (top left) ── */
   #fullscreen-btn {
@@ -525,14 +525,24 @@ document.getElementById('fullscreen-btn').addEventListener('click', (e) => {
     document.exitFullscreen();
   }
 });
-// ─── hide cursor after idle ───
-let cursorTimer;
-document.addEventListener('mousemove', () => {
-  document.body.style.cursor = 'default';
-  clearTimeout(cursorTimer);
-  cursorTimer = setTimeout(() => {
-    document.body.style.cursor = 'none';
-  }, 2000);
+// ─── keyboard shortcuts ───
+document.addEventListener('keydown', (e) => {
+  // F key: toggle fullscreen
+  if (e.key === 'f' || e.key === 'F') {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen();
+    }
+  }
+  // N key or right arrow: next route
+  if (e.key === 'n' || e.key === 'N' || e.key === 'ArrowRight') {
+    document.getElementById('change-btn').click();
+  }
+  // M key: mute toggle
+  if (e.key === 'm' || e.key === 'M') {
+    document.getElementById('click-area').click();
+  }
 });
 </script>
 </body>
