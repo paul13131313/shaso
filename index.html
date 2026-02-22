@@ -140,21 +140,31 @@
     z-index: 20;
     cursor: none;
   }
-  /* ── logo (top left) ── */
-  #logo {
+  /* ── fullscreen button (top left) ── */
+  #fullscreen-btn {
     position: fixed;
     top: 24px;
     left: 28px;
-    z-index: 30;
-    font-size: 0.85rem;
-    font-weight: 300;
-    color: rgba(255,255,255,0.45);
-    letter-spacing: 0.35em;
-    pointer-events: none;
+    z-index: 50;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
     opacity: 0;
     transition: opacity 1.5s ease;
+    padding: 2px;
   }
-  #logo.show { opacity: 1; }
+  #fullscreen-btn.show { opacity: 1; }
+  #fullscreen-btn svg {
+    width: 100%;
+    height: 100%;
+    stroke: rgba(255,255,255,0.45);
+    stroke-width: 1.5;
+    fill: none;
+    transition: stroke 0.3s ease;
+  }
+  #fullscreen-btn:hover svg {
+    stroke: rgba(255,255,255,0.7);
+  }
   /* ── time (top right) ── */
   #time-display {
     position: fixed;
@@ -183,53 +193,24 @@
     transition: opacity 1.5s ease;
   }
   #route-info.show { opacity: 1; }
-  /* ── fullscreen button (bottom right) ── */
-  #fullscreen-btn {
-    position: fixed;
-    bottom: 20px;
-    right: 24px;
-    z-index: 50;
-    width: 24px;
-    height: 24px;
-    cursor: pointer;
-    opacity: 0;
-    transition: opacity 1.5s ease;
-    padding: 2px;
-  }
-  #fullscreen-btn.show { opacity: 1; }
-  #fullscreen-btn svg {
-    width: 100%;
-    height: 100%;
-    stroke: rgba(255,255,255,0.45);
-    stroke-width: 1.5;
-    fill: none;
-    transition: stroke 0.3s ease;
-  }
-  #fullscreen-btn:hover svg {
-    stroke: rgba(255,255,255,0.7);
-  }
-  /* ── change route button (bottom center) ── */
+  /* ── change route button (bottom right) ── */
   #change-btn {
     position: fixed;
-    bottom: 22px;
-    left: 50%;
-    transform: translateX(-50%);
+    bottom: 24px;
+    right: 28px;
     z-index: 50;
     font-family: 'DM Mono', monospace;
     font-size: 0.7rem;
     color: rgba(255,255,255,0.45);
-    letter-spacing: 0.25em;
+    letter-spacing: 0.15em;
     cursor: pointer;
     opacity: 0;
     transition: opacity 1.5s ease, color 0.3s ease;
-    padding: 8px 20px;
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 20px;
+    padding: 6px 14px;
   }
   #change-btn.show { opacity: 1; }
   #change-btn:hover {
     color: rgba(255,255,255,0.7);
-    border-color: rgba(255,255,255,0.4);
   }
   /* ── mute toast ── */
   #mute-toast {
@@ -272,7 +253,6 @@
 <div id="window-frame"></div>
 <div id="reflection"></div>
 <div id="click-area"></div>
-<div id="logo">SHASO</div>
 <div id="time-display"></div>
 <div id="route-info"></div>
 <div id="fullscreen-btn" title="fullscreen">
@@ -283,7 +263,7 @@
     <polyline points="7,19 1,19 1,13"/>
   </svg>
 </div>
-<div id="change-btn">next</div>
+<div id="change-btn">next &gt;</div>
 <div id="fade-overlay"></div>
 <div id="mute-toast"></div>
 <script>
@@ -327,7 +307,6 @@ function start() {
   setInterval(updateTime, 60000);
   // show UI after a beat
   setTimeout(() => {
-    document.getElementById('logo').classList.add('show');
     document.getElementById('time-display').classList.add('show');
     document.getElementById('route-info').classList.add('show');
     document.getElementById('fullscreen-btn').classList.add('show');
