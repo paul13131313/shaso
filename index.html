@@ -270,12 +270,57 @@ function start() {
     document.getElementById('route-info').classList.add('show');
   }, 2000);
 }
-// ─── bgm ───
+// ─── bgm with crossfade loop ───
+const BGM_VOL = 0.3;
+const FADE_DUR = 3; // seconds
 function initBGM() {
   bgmAudio = new Audio('public/bgm.mp3');
-  bgmAudio.loop = true;
-  bgmAudio.volume = 0.3;
+  bgmAudio.volume = 0;
   bgmAudio.play().catch(() => {});
+  // fade in on start
+  fadeAudio(bgmAudio, 0, isMuted ? 0 : BGM_VOL, FADE_DUR);
+  // crossfade before end
+  bgmAudio.addEventListener('loadedmetadata', () => {
+    scheduleCrossfade();
+  });
+  // fallback if metadata already loaded
+  if (bgmAudio.duration) scheduleCrossfade();
+}
+function scheduleCrossfade() {
+  const checkInterval = setInterval(() => {
+    if (!bgmAudio || bgmAudio.paused) return;
+    const remaining = bgmAudio.duration - bgmAudio.currentTime;
+    if (remaining <= FADE_DUR + 0.1) {
+      clearInterval(checkInterval);
+      // fade out current
+      fadeAudio(bgmAudio, bgmAudio.volume, 0, FADE_DUR);
+      // start next copy with fade in
+      const next = new Audio('public/bgm.mp3');
+      next.volume = 0;
+      next.play().catch(() => {});
+      fadeAudio(next, 0, isMuted ? 0 : BGM_VOL, FADE_DUR);
+      next.addEventListener('loadedmetadata', () => {
+        bgmAudio = next;
+        scheduleCrossfade();
+      });
+      if (next.duration) {
+        bgmAudio = next;
+        scheduleCrossfade();
+      }
+    }
+  }, 500);
+}
+function fadeAudio(audio, from, to, dur) {
+  const steps = 30;
+  const interval = (dur * 1000) / steps;
+  const delta = (to - from) / steps;
+  let step = 0;
+  audio.volume = from;
+  const timer = setInterval(() => {
+    step++;
+    audio.volume = Math.max(0, Math.min(1, from + delta * step));
+    if (step >= steps) clearInterval(timer);
+  }, interval);
 }
 // ─── audio: synthesized gatangoton ───
 function initAudio() {
@@ -388,12 +433,12 @@ document.getElementById('click-area').addEventListener('click', () => {
   const toast = document.getElementById('mute-toast');
   if (isMuted) {
     window._audioMaster.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
-    if (bgmAudio) bgmAudio.volume = 0;
+    if (bgmAudio) fadeAudio(bgmAudio, bgmAudio.volume, 0, 0.5);
     indicator.classList.add('muted');
     toast.textContent = 'OFF';
   } else {
     window._audioMaster.gain.linearRampToValueAtTime(0.35, audioCtx.currentTime + 0.5);
-    if (bgmAudio) bgmAudio.volume = 0.3;
+    if (bgmAudio) fadeAudio(bgmAudio, bgmAudio.volume, BGM_VOL, 0.5);
     indicator.classList.remove('muted');
     toast.textContent = 'ON';
   }
