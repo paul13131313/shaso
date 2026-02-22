@@ -244,6 +244,37 @@
   #fullscreen-btn:hover svg {
     stroke: rgba(255,255,255,0.4);
   }
+  /* ── change route button ── */
+  #change-btn {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: rgba(255,255,255,0.12);
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.8s ease, color 0.3s ease;
+    padding: 8px 16px;
+  }
+  #change-btn.show { opacity: 1; }
+  #change-btn:hover { color: rgba(255,255,255,0.35); }
+  /* ── fade overlay for route transitions ── */
+  #fade-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    background: #0a0a0a;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 2s ease;
+  }
+  #fade-overlay.active {
+    opacity: 1;
+  }
 </style>
 </head>
 <body>
@@ -274,6 +305,8 @@
 </div>
 <div id="time-display"></div>
 <div id="route-info"></div>
+<div id="change-btn">next</div>
+<div id="fade-overlay"></div>
 <div id="mute-toast"></div>
 <script>
 // ─── config ───
@@ -319,6 +352,7 @@ function start() {
     document.getElementById('sound-indicator').classList.add('show');
     document.getElementById('route-info').classList.add('show');
     document.getElementById('fullscreen-btn').classList.add('show');
+    document.getElementById('change-btn').classList.add('show');
   }, 2000);
 }
 // ─── bgm with crossfade loop ───
@@ -503,6 +537,36 @@ function updateTime() {
   const m = String(now.getMinutes()).padStart(2, '0');
   document.getElementById('time-display').textContent = `${h}:${m}`;
 }
+// ─── change route with fade ───
+let isChanging = false;
+document.getElementById('change-btn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (isChanging) return;
+  isChanging = true;
+  const fade = document.getElementById('fade-overlay');
+  // fade to black
+  fade.classList.add('active');
+  setTimeout(() => {
+    // pick a different route
+    let next;
+    do {
+      next = ROUTES[Math.floor(Math.random() * ROUTES.length)];
+    } while (next.id === currentRoute.id && ROUTES.length > 1);
+    currentRoute = next;
+    const container = document.getElementById('video-container');
+    container.innerHTML = `<iframe
+      src="https://www.youtube.com/embed/${currentRoute.id}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&loop=1&playlist=${currentRoute.id}&start=${currentRoute.start}&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&playsinline=1"
+      allow="autoplay; encrypted-media"
+      allowfullscreen
+    ></iframe>`;
+    document.getElementById('route-info').textContent = currentRoute.name;
+    // fade back in after video has time to load
+    setTimeout(() => {
+      fade.classList.remove('active');
+      isChanging = false;
+    }, 2500);
+  }, 2000);
+});
 // ─── fullscreen ───
 document.getElementById('fullscreen-btn').addEventListener('click', (e) => {
   e.stopPropagation();
