@@ -7,6 +7,14 @@
 <meta name="description" content="Just watch.">
 <meta property="og:title" content="SHASO">
 <meta property="og:description" content="Just watch.">
+<meta property="og:image" content="https://paul13131313.github.io/shaso/public/ogp.png">
+<meta property="og:url" content="https://paul13131313.github.io/shaso/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SHASO">
+<meta name="twitter:description" content="Just watch.">
+<meta name="twitter:image" content="https://paul13131313.github.io/shaso/public/ogp.png">
+<link rel="icon" href="public/favicon.svg" type="image/svg+xml">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -245,12 +253,13 @@ const ROUTES = [
   { id: 'hQHkx_0GWOA', name: 'Odakyu Romancecar', start: 10 },
 ];
 let audioCtx, isMuted = false, gatanInterval;
-let currentRoute;
+let currentRoute, bgmAudio;
 // ─── init ───
 document.getElementById('start-btn').addEventListener('click', start);
 document.getElementById('intro').addEventListener('click', start);
 function start() {
   document.getElementById('intro').classList.add('hide');
+  initBGM();
   initAudio();
   initVideo();
   updateTime();
@@ -260,6 +269,13 @@ function start() {
     document.getElementById('sound-indicator').classList.add('show');
     document.getElementById('route-info').classList.add('show');
   }, 2000);
+}
+// ─── bgm ───
+function initBGM() {
+  bgmAudio = new Audio('public/bgm.mp3');
+  bgmAudio.loop = true;
+  bgmAudio.volume = 0.3;
+  bgmAudio.play().catch(() => {});
 }
 // ─── audio: synthesized gatangoton ───
 function initAudio() {
@@ -372,10 +388,12 @@ document.getElementById('click-area').addEventListener('click', () => {
   const toast = document.getElementById('mute-toast');
   if (isMuted) {
     window._audioMaster.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
+    if (bgmAudio) bgmAudio.volume = 0;
     indicator.classList.add('muted');
     toast.textContent = 'OFF';
   } else {
     window._audioMaster.gain.linearRampToValueAtTime(0.35, audioCtx.currentTime + 0.5);
+    if (bgmAudio) bgmAudio.volume = 0.3;
     indicator.classList.remove('muted');
     toast.textContent = 'ON';
   }

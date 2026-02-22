@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="12" fill="#0a0a0a"/>
+  <g stroke="#e8e4df" stroke-width="1.5" fill="none" stroke-linecap="round">
+    <!-- window frame -->
+    <rect x="12" y="16" width="40" height="32" rx="3" opacity="0.6"/>
+    <!-- horizontal landscape lines -->
+    <line x1="16" y1="36" x2="48" y2="36" opacity="0.3"/>
+    <line x1="14" y1="40" x2="50" y2="40" opacity="0.2"/>
+    <!-- distant mountains -->
+    <polyline points="16,32 24,24 32,30 38,22 48,32" opacity="0.4"/>
+  </g>
+</svg>

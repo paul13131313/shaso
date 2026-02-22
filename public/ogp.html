@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1200px;
+    height: 630px;
+    background: #0a0a0a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    overflow: hidden;
+    position: relative;
+  }
+  /* window frame effect */
+  .frame {
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 200px rgba(0,0,0,0.7);
+    pointer-events: none;
+  }
+  .frame::before {
+    content: '';
+    position: absolute;
+    inset: 4%;
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 12px;
+  }
+  /* landscape lines */
+  .landscape {
+    position: absolute;
+    bottom: 38%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(255,255,255,0.04);
+  }
+  .landscape.two {
+    bottom: 34%;
+    background: rgba(255,255,255,0.03);
+  }
+  h1 {
+    font-size: 96px;
+    font-weight: 300;
+    color: #e8e4df;
+    letter-spacing: 0.5em;
+    margin-right: -0.5em;
+  }
+  p {
+    margin-top: 24px;
+    font-size: 18px;
+    color: #555;
+    letter-spacing: 0.3em;
+  }
+  /* route name bottom left */
+  .route {
+    position: absolute;
+    bottom: 36px;
+    left: 48px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.1);
+    letter-spacing: 0.1em;
+  }
+  /* time top right */
+  .time {
+    position: absolute;
+    top: 36px;
+    right: 48px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.1);
+    letter-spacing: 0.15em;
+  }
+</style>
+</head>
+<body>
+  <div class="frame"></div>
+  <div class="landscape"></div>
+  <div class="landscape two"></div>
+  <h1>SHASO</h1>
+  <p>Just watch.</p>
+  <div class="route">Enoden</div>
+  <div class="time">23:45</div>
+</body>
+</html>
