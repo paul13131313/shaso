@@ -246,11 +246,29 @@
 <script>
 // ─── config ───
 const ROUTES = [
-  { id: 'BQX5ycMWSCg', name: 'Enoden', start: 10 },
-  { id: 'wSMVKMDz7CQ', name: 'Hakone Tozan', start: 30 },
-  { id: '6_VsOby8K-A', name: 'Sagano Torokko', start: 20 },
-  { id: 'k05OyAU4Yis', name: 'JR Gonō Line', start: 60 },
-  { id: 'hQHkx_0GWOA', name: 'Odakyu Romancecar', start: 10 },
+  // Switzerland
+  { id: 'nKOe2PuERD0', name: 'Bernina Express — Switzerland', start: 600 },
+  { id: 'Mw9qiV7XlFs', name: 'Bernina Pass, Autumn — Switzerland', start: 300 },
+  { id: 'tnUxvl7gZOw', name: 'Albula Line — Switzerland', start: 300 },
+  { id: 'reQIWxID9JM', name: 'Golden Pass — Switzerland', start: 120 },
+  // Norway
+  { id: 'eQo60OoYAJ0', name: 'Bergen Railway — Norway', start: 600 },
+  { id: 'M17BPhDrKg0', name: 'Dark Season Morning — Norway', start: 0 },
+  { id: 'Q1IdDco_MFE', name: 'November Sunrise — Norway', start: 0 },
+  // Scotland
+  { id: 'oHrnBcYW6U0', name: 'West Highland Line — Scotland', start: 0 },
+  // Austria
+  { id: 'QXGTzbPaF1w', name: 'Brenner Pass, Snow — Austria', start: 0 },
+  // New Zealand
+  { id: 'C9Pkipagj7M', name: 'TranzAlpine — New Zealand', start: 600 },
+  // Sri Lanka
+  { id: 'hxITmHjOD-w', name: 'Kandy to Ella — Sri Lanka', start: 120 },
+  // Japan
+  { id: '-qqw0h3A0L4', name: 'Saphir Odoriko, Izu Coast — Japan', start: 3600 },
+  { id: 'kKF5wGR8Luc', name: 'Riverside Gifu — Japan', start: 0 },
+  { id: 'eCE4hYw8AAI', name: 'Tokyo Bay Twilight — Japan', start: 0 },
+  { id: 'WKF6roEDPvI', name: 'Green Summer Nagano — Japan', start: 0 },
+  { id: 'X7tEnT5eizQ', name: 'San\'in Coastline — Japan', start: 0 },
 ];
 let audioCtx, isMuted = false, gatanInterval;
 let currentRoute, bgmAudio;
